@@ -1,47 +1,29 @@
-const express = require("express")
-const fs= require("fs")
+const express = require('express')
 const app = express()
-app.use(express.urlencoded({extended:true}))
+const fs = require('fs')
+app.use(express.json())
 
-
-app.set('view engine', 'ejs')
- 
-app.get('/', (req, res) => {
-   res.render('form')
-})
-app.post('/home', function(req,res){
-  const salvar = JSON.stringify(req.body)
-  fs.writeFileSync(`${req.body.email}.json`, salvar, (err) =>{
-   if(err){
-        res.send({message: err})
-   }else{
-         res.send({message: 'ok'})  
-   }
-  } )
- 
-})
-app.get('/lista', function(req, res) {
-   fs.readdir(__dirname, (err,files)=>{
-     var dados = files.filter(file => file.includes('@') && file.includes('.json'))
-     res.send( {dados: dados})
-   
-   })
- })
-app.get('/dados/:email', (req,res)=>{
-   var dados = req.params
-   var dadosfinais = JSON.parse(fs.readFileSync(dados.email))
-   res.send({dados: dadosfinais})
-})
-app.get('/apagar/:email', (req,res)=>{
-   var dados = req.params
-   if (fs.existsSync(dados.email)){
-        res.send({message: 'ok'})
-       fs.rmSync(dados.email)
-   }else{
-        res.send({message: 'erro'})
-   }
+app.get('/get/:email', (req,res)=>{
+    const dados = fs.readFileSync(__dirname+'/'+req.params.email+'.json')
+    res.send(dados)
 })
 
-app.listen(2527, () =>{
-   console.log("Rodou meu mano :p")
+app.post('/post', (req,res)=>{
+  fs.writeFileSync(req.body.email+'.json', JSON.stringify(req.body))
+  res.send('Seus dados foram enviados')
 })
+
+app.put('/put', (req,res)=>{
+    fs.writeFileSync(req.body.email+'.json', JSON.stringify(req.body), {flag: 'W'})
+    res.send('Seus dados foram atualizados')
+  })
+app.delete('/delete', (req,res)=>{
+    fs.unlink(__dirname+'/'+req.body.email+'.json')
+    res.send('Seus dados foram deletados')
+  })
+
+app.use((req,res)=>{
+    res.send('não foi possível encontrar sua rota')
+})
+
+app.listen(3000, ()=>console.log(`o servidor ta rodando nessa porta aí meu fiel ${5555}`))
