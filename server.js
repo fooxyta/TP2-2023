@@ -3,13 +3,23 @@ const app = express()
 const mongoose = require('mongoose')
 app.use(express.json())
 
+
+const dotenv = require('dotenv')
+
+if (process.env.devouprod === 'dev') {
+dotenv.config({path: './config/.env.dev'})
+}
+
+if (process.env.devouprod === 'prod') {
+    dotenv.config({path: './config/.env.prod'})
+}
 const modelodeUsuario = mongoose.model('contas', new mongoose.Schema({
     email: String,
     password: String
 }))
 
-mongoose.connect("mongodb://localhost:27017/newdeal")
-.then(function(){
+    mongoose.connect(process.env.bancodedados)
+    .then(function(){
 
 app.get('/get/:email', async (req,res)=>{
     const usuarioEncontrado = await modelodeUsuario.findOne({email: req.params.email})
