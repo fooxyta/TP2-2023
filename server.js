@@ -18,12 +18,14 @@ const modelodeUsuario = mongoose.model('contas', new mongoose.Schema({
     password: String
 }))
 
-    mongoose.connect(process.env.bancodedados)
+    mongoose.connect('mongodb://127.0.0.1:27017/macaco')
     .then(function(){
 
-app.get('/get/:email', async (req,res)=>{
-    const usuarioEncontrado = await modelodeUsuario.findOne({email: req.params.email})
-    console.log(usuarioEncontrado);
+app.post('/get/', async (req,res)=>{
+    const usuarioEncontrado = await modelodeUsuario.findOne({email: req.body.email, password: req.body.password})
+    if (usuarioEncontrado === null) {
+       return res.send('Essa conta não existe')
+    }
     res.send(usuarioEncontrado)
 })
  
@@ -34,7 +36,7 @@ app.post('/post',async (req,res) =>{
 
 app.put('/put', async (req,res)=>{
     const usuarioAtualizado = await modelodeUsuario.findOneAndUpdate({email: req.body.email, password: req.body.password}, {email: req.body.newemail, password: req.body.newpassword})
-    res.send(usuarioAtualizado)
+    res.send({message: "Seus dados foram atualizados mano"})
 })
   
 app.delete('/delete', async (req,res)=>{
